@@ -3,6 +3,7 @@ package com.vajasoft.diskusefx;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.AccessDeniedException;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -16,13 +17,15 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Cursor;
 import javafx.scene.chart.BarChart;
+import javafx.scene.chart.CategoryAxis;
+import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
+import javafx.scene.layout.BorderPane;
 import javafx.stage.DirectoryChooser;
-import javafx.stage.DirectoryChooserBuilder;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
@@ -32,7 +35,7 @@ import javafx.stage.Stage;
  */
 public class DiskUseFXController implements Initializable {
 
-    private static NodeComparator sComparator = new NodeComparator(false);
+    private static final NodeComparator sComparator = new NodeComparator(false);
     private static final int X_LARGEST = 10;
     private static final int SIZE_UNIT = 1024 * 1024;
     private static final String SIZE_UNIT_LABEL = "Mb";
@@ -50,7 +53,7 @@ public class DiskUseFXController implements Initializable {
     private @FXML
     TreeView dirTree;
     private @FXML
-    BarChart topTen;
+    BorderPane pnlChart;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -63,8 +66,6 @@ public class DiskUseFXController implements Initializable {
                 }
             }
         });
-        topTen.setAnimated(false);
-        topTen.getYAxis().setLabel(SIZE_UNIT_LABEL);
         setCommands();
     }
 
@@ -134,24 +135,21 @@ public class DiskUseFXController implements Initializable {
         }
         java.util.Arrays.sort(nodes, sComparator);
         count = Math.min(count, X_LARGEST);
-//        ObservableList<BarChart.Data> barChartData = FXCollections.observableArrayList();
-//        for (int i = 0; i < count; i++) {
-//            barChartData.add(new BarChart.Data(nodes[i].getName(), nodes[i].getSize() / SIZE_UNIT));
-//        }
-//
+
+        CategoryAxis xAxis = new CategoryAxis();
+        NumberAxis yAxis = new NumberAxis();
+        BarChart<String, Number> topTen = new BarChart<>(xAxis, yAxis);
+        topTen.setAnimated(false);
+        topTen.getYAxis().setLabel(SIZE_UNIT_LABEL);
         topTen.setTitle(node.getPathName() + " (" + (node.getSize() / SIZE_UNIT) + " " + SIZE_UNIT_LABEL + ")");
-//        topTen.getXAxis().setLabel("Folders");
-//        ObservableList<BarChart.Series> barChartSeries = FXCollections.observableArrayList(
-//                new BarChart.Series(count + " largest", barChartData));
-//        topTen.setData(barChartSeries);
         XYChart.Series series = new XYChart.Series();
         series.setName(count + " largest");
         for (int i = 0; i < count; i++) {
             series.getData().add(new XYChart.Data(nodes[i].getName(), nodes[i].getSize() / SIZE_UNIT));
         }
-        topTen.getData().clear();
         topTen.getData().add(series);
-        topTen.getParent().layout();
+//        pnlChart.getChildren().clear();
+        pnlChart.setCenter(topTen);
     }
 
     private void setCommands() {
@@ -167,7 +165,7 @@ public class DiskUseFXController implements Initializable {
 
     private static class NodeComparator implements java.util.Comparator {
 
-        private boolean ascend;
+        private final boolean ascend;
 
         public NodeComparator(boolean ascending) {
             ascend = ascending;
@@ -203,7 +201,11 @@ public class DiskUseFXController implements Initializable {
             } else if (WorkerStateEvent.WORKER_STATE_FAILED.equals(etype)) {
                 Throwable ex = t.getSource().getException();
                 if (ex != null) {
-                    Logger.getLogger(DiskUseFXController.class.getName()).log(Level.SEVERE, null, ex);
+                    if (ex instanceof AccessDeniedException) {
+                        Logger.getLogger(DiskUseFXController.class.getName()).log(Level.INFO, ex.toString());
+                    } else {
+                        Logger.getLogger(DiskUseFXController.class.getName()).log(Level.SEVERE, null, ex);
+                    }
                 }
                 ctx.getWindow().getScene().setCursor(Cursor.DEFAULT);
             } else if (WorkerStateEvent.WORKER_STATE_CANCELLED.equals(etype)) {

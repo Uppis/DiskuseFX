@@ -10,7 +10,7 @@
 <?import javafx.scene.input.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane id="AnchorPane" prefHeight="400.0" prefWidth="500.0" xmlns:fx="http://javafx.com/fxml" fx:controller="com.vajasoft.diskusefx.DiskUseFXController">
+<AnchorPane id="AnchorPane" prefHeight="400.0" prefWidth="500.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8" fx:controller="com.vajasoft.diskusefx.DiskUseFXController">
   <children>
     <MenuBar prefWidth="600.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
       <menus>
@@ -23,8 +23,8 @@
         </Menu>
         <Menu text="_View">
           <items>
-            <MenuItem onAction="#onParent" text="_Parent" fx:id="mnuParent" />
-            <MenuItem onAction="#onRefresh" text="_Refresh" fx:id="mnuRefresh" />
+            <MenuItem fx:id="mnuParent" onAction="#onParent" text="_Parent" />
+            <MenuItem fx:id="mnuRefresh" onAction="#onRefresh" text="_Refresh" />
           </items>
         </Menu>
         <Menu text="_Help">
@@ -40,7 +40,7 @@
           <graphic>
             <ImageView fitHeight="17.0" fitWidth="17.0" mouseTransparent="true" pickOnBounds="true" preserveRatio="true" smooth="false">
               <image>
-                <Image url="@../../../image/open.png" preserveRatio="false" smooth="false" />
+                <Image preserveRatio="false" smooth="false" url="@../../../image/open.png" />
               </image>
             </ImageView>
           </graphic>
@@ -49,7 +49,7 @@
           <graphic>
             <ImageView fitHeight="17.0" fitWidth="17.0" mouseTransparent="true" pickOnBounds="true" preserveRatio="true" smooth="false">
               <image>
-                <Image url="@../../../image/parent.png" preserveRatio="false" smooth="false" />
+                <Image preserveRatio="false" smooth="false" url="@../../../image/parent.png" />
               </image>
             </ImageView>
           </graphic>
@@ -58,36 +58,21 @@
           <graphic>
             <ImageView fitHeight="17.0" fitWidth="17.0" mouseTransparent="true" pickOnBounds="true" preserveRatio="true" smooth="false">
               <image>
-                <Image url="@../../../image/refresh.png" preserveRatio="false" smooth="false" />
+                <Image preserveRatio="false" smooth="false" url="@../../../image/refresh.png" />
               </image>
             </ImageView>
           </graphic>
         </Button>
       </items>
     </ToolBar>
-    <SplitPane dividerPositions="0.2991967871485944" focusTraversable="true" prefHeight="352.0" prefWidth="500.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="48.0">
+    <SplitPane dividerPositions="0.5" focusTraversable="true" prefHeight="352.0" prefWidth="500.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="48.0">
       <items>
         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
           <children>
             <TreeView fx:id="dirTree" prefHeight="374.0" prefWidth="198.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
           </children>
         </AnchorPane>
-        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
-          <children>
-            <BarChart fx:id="topTen" prefHeight="374.0" prefWidth="294.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-              <xAxis>
-                <CategoryAxis side="BOTTOM">
-                  <categories>
-                    <FXCollections fx:factory="observableArrayList" />
-                  </categories>
-                </CategoryAxis>
-              </xAxis>
-              <yAxis>
-                <NumberAxis side="LEFT" />
-              </yAxis>
-            </BarChart>
-          </children>
-        </AnchorPane>
+            <BorderPane fx:id="pnlChart" prefHeight="200.0" prefWidth="200.0" />
       </items>
     </SplitPane>
   </children>
