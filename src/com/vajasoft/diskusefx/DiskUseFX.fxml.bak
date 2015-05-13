@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.collections.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.chart.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.input.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane id="AnchorPane" prefHeight="400.0" prefWidth="500.0" xmlns:fx="http://javafx.com/fxml" fx:controller="com.vajasoft.diskuse.DiskUseFXController">
+  <children>
+    <MenuBar prefWidth="600.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <menus>
+        <Menu text="_File">
+          <items>
+            <MenuItem onAction="#onOpen" text="_Open...">
+              <accelerator>
+                <KeyCodeCombination code="O" />
+              </accelerator>
+            </MenuItem>
+            <MenuItem onAction="#onExit" text="E_xit" />
+          </items>
+        </Menu>
+        <Menu text="_View">
+          <items>
+            <MenuItem onAction="#onParent" text="_Parent" fx:id="mnuParent" />
+            <MenuItem onAction="#onRefresh" text="_Refresh" fx:id="mnuRefresh" />
+          </items>
+        </Menu>
+        <Menu text="_Help">
+          <items>
+            <MenuItem onAction="onAbout" text="_About" />
+          </items>
+        </Menu>
+      </menus>
+    </MenuBar>
+    <ToolBar minHeight="24.0" prefHeight="24.0" prefWidth="498.0" AnchorPane.leftAnchor="1.0" AnchorPane.rightAnchor="1.0" AnchorPane.topAnchor="24.0">
+      <items>
+        <Button focusTraversable="false" maxHeight="19.0" maxWidth="21.0" minHeight="19.0" minWidth="21.0" mnemonicParsing="false" onAction="#onOpen" prefHeight="19.0" prefWidth="21.0">
+          <graphic>
+            <ImageView fitHeight="17.0" fitWidth="17.0" mouseTransparent="true" pickOnBounds="true" preserveRatio="true" smooth="false">
+              <image>
+                <Image url="@../../../image/open.png" preserveRatio="false" smooth="false" />
+              </image>
+            </ImageView>
+          </graphic>
+        </Button>
+        <Button fx:id="cmdParent" focusTraversable="false" maxHeight="19.0" maxWidth="21.0" minHeight="19.0" minWidth="21.0" mnemonicParsing="false" onAction="#onParent" prefHeight="19.0" prefWidth="21.0">
+          <graphic>
+            <ImageView fitHeight="17.0" fitWidth="17.0" mouseTransparent="true" pickOnBounds="true" preserveRatio="true" smooth="false">
+              <image>
+                <Image url="@../../../image/parent.png" preserveRatio="false" smooth="false" />
+              </image>
+            </ImageView>
+          </graphic>
+        </Button>
+        <Button fx:id="cmdRefresh" focusTraversable="false" maxHeight="19.0" maxWidth="21.0" minHeight="19.0" minWidth="21.0" mnemonicParsing="false" onAction="#onRefresh" prefHeight="19.0" prefWidth="21.0">
+          <graphic>
+            <ImageView fitHeight="17.0" fitWidth="17.0" mouseTransparent="true" pickOnBounds="true" preserveRatio="true" smooth="false">
+              <image>
+                <Image url="@../../../image/refresh.png" preserveRatio="false" smooth="false" />
+              </image>
+            </ImageView>
+          </graphic>
+        </Button>
+      </items>
+    </ToolBar>
+    <SplitPane dividerPositions="0.2991967871485944" focusTraversable="true" prefHeight="352.0" prefWidth="500.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="48.0">
+      <items>
+        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+          <children>
+            <TreeView fx:id="dirTree" prefHeight="374.0" prefWidth="198.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+          </children>
+        </AnchorPane>
+        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+          <children>
+            <BarChart fx:id="topTen" prefHeight="374.0" prefWidth="294.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+              <xAxis>
+                <CategoryAxis side="BOTTOM">
+                  <categories>
+                    <FXCollections fx:factory="observableArrayList" />
+                  </categories>
+                </CategoryAxis>
+              </xAxis>
+              <yAxis>
+                <NumberAxis side="LEFT" />
+              </yAxis>
+            </BarChart>
+          </children>
+        </AnchorPane>
+      </items>
+    </SplitPane>
+  </children>
+</AnchorPane>

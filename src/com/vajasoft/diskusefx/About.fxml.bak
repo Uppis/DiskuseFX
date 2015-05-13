@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.paint.*?>
+
+<AnchorPane id="AnchorPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="237.0" prefWidth="349.0" xmlns:fx="http://javafx.com/fxml" fx:controller="com.vajasoft.diskusefx.AboutController">
+  <children>
+    <VBox id="VBox" alignment="CENTER" spacing="5.0" AnchorPane.bottomAnchor="20.0" AnchorPane.leftAnchor="76.0" AnchorPane.rightAnchor="73.0" AnchorPane.topAnchor="14.0">
+      <children>
+        <TextArea fx:id="fldAbout" editable="false" prefHeight="165.0" prefWidth="200.0" />
+        <Button fx:id="cmdClose" cancelButton="true" defaultButton="true" mnemonicParsing="false" onAction="#onClose" text="Close">
+          <VBox.margin>
+            <Insets top="12.0" />
+          </VBox.margin>
+        </Button>
+      </children>
+    </VBox>
+  </children>
+</AnchorPane>
