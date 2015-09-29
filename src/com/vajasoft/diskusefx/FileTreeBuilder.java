@@ -1,6 +1,7 @@
 package com.vajasoft.diskusefx;
 
 import java.io.IOException;
+import java.nio.file.AccessDeniedException;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
@@ -16,6 +17,9 @@ public class FileTreeBuilder extends SimpleFileVisitor<Path> implements EventHan
     @Override
     public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) {
         FileNode folder = new FileNode(dir);
+        if (attrs.isSymbolicLink()) {
+            System.out.println("Symbolic link: " + dir);
+        }
         if (cursor != null) {
             cursor.insertNode(folder);
         } else {
@@ -28,6 +32,9 @@ public class FileTreeBuilder extends SimpleFileVisitor<Path> implements EventHan
     @Override
     public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
         FileNode node = new FileNode(file);
+        if (attrs.isSymbolicLink()) {
+            System.out.println("Symbolic link: " + file);
+        }
         if (cursor != null) {
             cursor.insertNode(node);
         } else {
@@ -38,7 +45,7 @@ public class FileTreeBuilder extends SimpleFileVisitor<Path> implements EventHan
 
     @Override
     public FileVisitResult postVisitDirectory(Path dir, IOException exc) {
-        FileNode parent = (FileNode) cursor.getParent();
+        FileNode parent = (FileNode)cursor.getParent();
         if (parent != null) {
             parent.increaseSize(cursor.getSize());
             cursor = parent;
@@ -52,7 +59,11 @@ public class FileTreeBuilder extends SimpleFileVisitor<Path> implements EventHan
 
     @Override
     public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
-        exc.printStackTrace();
+        if (exc instanceof AccessDeniedException) {
+            System.out.println(exc);
+        } else {
+            exc.printStackTrace();
+        }
         return result;
     }
 
