@@ -6,6 +6,8 @@ import java.nio.file.FileVisitResult;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.event.EventHandler;
 
@@ -17,9 +19,6 @@ public class FileTreeBuilder extends SimpleFileVisitor<Path> implements EventHan
     @Override
     public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) {
         FileNode folder = new FileNode(dir);
-        if (attrs.isSymbolicLink()) {
-            System.out.println("Symbolic link: " + dir);
-        }
         if (cursor != null) {
             cursor.insertNode(folder);
         } else {
@@ -32,9 +31,6 @@ public class FileTreeBuilder extends SimpleFileVisitor<Path> implements EventHan
     @Override
     public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
         FileNode node = new FileNode(file);
-        if (attrs.isSymbolicLink()) {
-            System.out.println("Symbolic link: " + file);
-        }
         if (cursor != null) {
             cursor.insertNode(node);
         } else {
@@ -45,7 +41,7 @@ public class FileTreeBuilder extends SimpleFileVisitor<Path> implements EventHan
 
     @Override
     public FileVisitResult postVisitDirectory(Path dir, IOException exc) {
-        FileNode parent = (FileNode)cursor.getParent();
+        FileNode parent = (FileNode) cursor.getParent();
         if (parent != null) {
             parent.increaseSize(cursor.getSize());
             cursor = parent;
@@ -58,12 +54,11 @@ public class FileTreeBuilder extends SimpleFileVisitor<Path> implements EventHan
     }
 
     @Override
-    public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
-        if (exc instanceof AccessDeniedException) {
-            System.out.println(exc);
-        } else {
-            exc.printStackTrace();
-        }
+    public FileVisitResult visitFileFailed(Path file, IOException ex) throws IOException {
+		if (ex instanceof AccessDeniedException) {
+			System.out.println(ex);
+		} else {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);		}
         return result;
     }
 

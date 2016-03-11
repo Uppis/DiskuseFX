@@ -2,12 +2,14 @@ package com.vajasoft.diskusefx;
 
 import java.io.IOException;
 import java.nio.file.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.scene.control.TreeItem;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
 public class FileNode extends TreeItem<String> {
-    private static Image imgFolder = new Image("/image/folder.png");
+    private static final Image IMG_FOLDER = new Image("/image/folder.png");
     private String path;
     private String name;
     private boolean isDir;
@@ -25,10 +27,10 @@ public class FileNode extends TreeItem<String> {
             if (!isDir) {
                 size = Files.size(file);
             } else {
-                setGraphic(new ImageView(imgFolder));
+                setGraphic(new ImageView(IMG_FOLDER));
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, e);
         }
     }
 
@@ -52,6 +54,7 @@ public class FileNode extends TreeItem<String> {
         size += by;
     }
 
+    @Override
     public boolean isLeaf() {
         return isDirectory() == false;
     }

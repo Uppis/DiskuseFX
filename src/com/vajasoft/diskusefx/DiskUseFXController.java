@@ -4,11 +4,18 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.AccessDeniedException;
+import java.text.NumberFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -35,10 +42,12 @@ import javafx.stage.Stage;
  */
 public class DiskUseFXController implements Initializable {
 
-    private static final NodeComparator sComparator = new NodeComparator(false);
+    private static final NodeComparator COMPARATOR = new NodeComparator();
     private static final int X_LARGEST = 10;
-    private static final int SIZE_UNIT = 1024 * 1024;
-    private static final String SIZE_UNIT_LABEL = "Mb";
+    private static final long[] SIZE_UNIT = {1, 1024, 1024*1024, 1024*1024*1024};
+    private static final String[] SIZE_UNIT_LABEL = {"B", "KB", "MB", "GB"};
+    
+    private final NumberFormat sizeFormatter = NumberFormat.getNumberInstance();
     private AppContext ctx;
     private DirectoryChooser dirChooser;
     private File currentRoot;
@@ -53,15 +62,16 @@ public class DiskUseFXController implements Initializable {
     private @FXML
     TreeView dirTree;
     private @FXML
-    BorderPane pnlChart;
-
+    BorderPane chartPane;
+    
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        sizeFormatter.setMaximumFractionDigits(1);
         dirChooser = new DirectoryChooser();
         dirTree.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<FileNode>() {
             @Override
             public void changed(ObservableValue<? extends FileNode> ov, FileNode oldVal, FileNode newVal) {
-                if (newVal != null) {
+                if (newVal != null && !newVal.getChildren().isEmpty()) {
                     setChart(newVal);
                 }
             }
@@ -128,28 +138,35 @@ public class DiskUseFXController implements Initializable {
     }
 
     private void setChart(FileNode node) {
-        int count = node.getChildren().size();
-        FileNode[] nodes = new FileNode[count];
-        for (int i = 0; i < count; i++) {
-            nodes[i] = (FileNode) node.getChildren().get(i);
-        }
-        java.util.Arrays.sort(nodes, sComparator);
-        count = Math.min(count, X_LARGEST);
+        int chartLimit = Math.min(node.getChildren().size(), X_LARGEST);
+        String categoryLabel = chartLimit + " largest";
 
-        CategoryAxis xAxis = new CategoryAxis();
-        NumberAxis yAxis = new NumberAxis();
-        BarChart<String, Number> topTen = new BarChart<>(xAxis, yAxis);
-        topTen.setAnimated(false);
-        topTen.getYAxis().setLabel(SIZE_UNIT_LABEL);
-        topTen.setTitle(node.getPathName() + " (" + (node.getSize() / SIZE_UNIT) + " " + SIZE_UNIT_LABEL + ")");
-        XYChart.Series series = new XYChart.Series();
-        series.setName(count + " largest");
-        for (int i = 0; i < count; i++) {
-            series.getData().add(new XYChart.Data(nodes[i].getName(), nodes[i].getSize() / SIZE_UNIT));
+        List<TreeItem<String>> sortBuf = new ArrayList<>(node.getChildren());
+        Collections.sort(sortBuf, COMPARATOR);
+
+        int totalSizeUnit = getSizeUnit(node.getSize());
+        int dataSizeUnit = getSizeUnit(((FileNode)sortBuf.get(0)).getSize());
+
+        ObservableList<XYChart.Data<String, Double>> data = FXCollections.observableArrayList();
+        for (int i = 0; i < chartLimit && i < sortBuf.size(); i++) {
+            FileNode n = (FileNode)sortBuf.get(i);
+            String x = n.getName();
+            double y = (double)n.getSize() / SIZE_UNIT[dataSizeUnit];
+            data.add(new XYChart.Data<>(x, y));
         }
-        topTen.getData().add(series);
-//        pnlChart.getChildren().clear();
-        pnlChart.setCenter(topTen);
+
+        BarChart chart = new BarChart(new CategoryAxis(), new NumberAxis());
+        chart.setAnimated(false);
+        chart.setLegendVisible(false);
+
+        XYChart.Series series = new XYChart.Series(categoryLabel, data);
+        chart.setTitle(node.getPathName() + " (" + sizeFormatter.format((double)node.getSize() / SIZE_UNIT[totalSizeUnit]) + " " + SIZE_UNIT_LABEL[totalSizeUnit] + ")");
+        chart.getYAxis().setLabel(SIZE_UNIT_LABEL[dataSizeUnit]);
+        chart.getXAxis().setLabel(categoryLabel);
+        chart.getData().clear();
+        chart.getData().add(series);
+
+        chartPane.setCenter(chart);
     }
 
     private void setCommands() {
@@ -163,22 +180,20 @@ public class DiskUseFXController implements Initializable {
         cmdParent.setDisable(!hasParent);
     }
 
-    private static class NodeComparator implements java.util.Comparator {
+    private int getSizeUnit(long forSize) {
+        int ret = SIZE_UNIT.length - 1;
+        while (ret > 0  && SIZE_UNIT[ret] > forSize)
+            ret--;
+        return ret;
+    }
 
-        private final boolean ascend;
-
-        public NodeComparator(boolean ascending) {
-            ascend = ascending;
-        }
-
+    private static class NodeComparator implements Comparator<TreeItem<String>> {
         @Override
-        public int compare(Object o1, Object o2) {
-            FileNode n1 = (FileNode) o1;
-            FileNode n2 = (FileNode) o2;
-            if (n1.getSize() < n2.getSize()) {
-                return ascend ? - 1 : 1;
-            } else if (n1.getSize() > n2.getSize()) {
-                return ascend ? 1 : -1;
+        public int compare(TreeItem<String> o1, TreeItem<String> o2) {
+            if (((FileNode)o1).getSize() < ((FileNode)o2).getSize()) {
+                return 1;
+            } else if (((FileNode)o1).getSize() > ((FileNode)o2).getSize()) {
+                return -1;
             } else {
                 return 0;
             }
@@ -197,6 +212,7 @@ public class DiskUseFXController implements Initializable {
                 root.setExpanded(true);
                 dirTree.setRoot(root);
                 dirTree.getSelectionModel().selectFirst();
+                dirTree.requestFocus();
                 ctx.getWindow().getScene().setCursor(Cursor.DEFAULT);
             } else if (WorkerStateEvent.WORKER_STATE_FAILED.equals(etype)) {
                 Throwable ex = t.getSource().getException();
@@ -204,8 +220,8 @@ public class DiskUseFXController implements Initializable {
                     if (ex instanceof AccessDeniedException) {
                         Logger.getLogger(DiskUseFXController.class.getName()).log(Level.INFO, ex.toString());
                     } else {
-                        Logger.getLogger(DiskUseFXController.class.getName()).log(Level.SEVERE, null, ex);
-                    }
+                    Logger.getLogger(DiskUseFXController.class.getName()).log(Level.SEVERE, null, ex);
+                }
                 }
                 ctx.getWindow().getScene().setCursor(Cursor.DEFAULT);
             } else if (WorkerStateEvent.WORKER_STATE_CANCELLED.equals(etype)) {
